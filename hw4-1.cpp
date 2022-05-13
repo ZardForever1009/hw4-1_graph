@@ -10,8 +10,7 @@
 using namespace std;
 
 /*
-
- << Adjacency List Implemntation >>
+	<< Adjacency List Implemntation >>
 
 Head / Node1 / Node2 / Node3 ......  
 A  ->   a   ->  b   ->  nullptr
@@ -20,18 +19,24 @@ C  ->   b   ->  nullptr
 
 */
 
+/*-------------------------DEFINITION------------------------------*/
+
 // represent Head
-struct Head_Node{
-	int vertex_num=-1;
+struct Head{
+	int num=-1;
 	Head_Node* next_head=nullptr;
 };
 
 // represent conected Node with Head
 struct Node{
-	int vertex_num=-1;
+	int num=-1;
 	int weight=INT_MAX;
 	Node* next_node=nullptr;
 };
+
+/*----------------------OTHER FUNCTIONS---------------------------*/
+
+/*----------------------ACTION FUNCTION---------------------------*/
 
 // check if input number is valid or not
 bool validNum(int num){

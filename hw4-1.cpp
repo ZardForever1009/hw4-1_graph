@@ -21,12 +21,6 @@ C  ->   b   ->  nullptr
 
 /*-------------------------DEFINITION------------------------------*/
 
-// represent Head
-struct Head{
-	int num=-1;
-	Head_Node* next_head=nullptr;
-};
-
 // represent conected Node with Head
 struct Node{
 	int num=-1;
@@ -34,40 +28,134 @@ struct Node{
 	Node* next_node=nullptr;
 };
 
-/*----------------------OTHER FUNCTIONS---------------------------*/
+// represent Head
+struct Head{
+	int num=-1;
+	Head* next_head=nullptr;
+	Node* next_node=nullptr;
+};
 
-/*----------------------ACTION FUNCTION---------------------------*/
+
+/*----------------------OTHER FUNCTIONS---------------------------*/
 
 // check if input number is valid or not
 bool validNum(int num){
 	return(num>=0&&num<=100);
 }
 
+// check if vertex is already in G
+bool vertexExist(Head* head, int num){
+	while(head!=nullptr){
+		if(head->num==num)return true;
+		head=head->next_head;
+	}
+	return false;
+}
+
+// print out all connections
+void printAdjList(Head* head){
+	if(head==nullptr){
+		cout<<"Empty adjacency list\n";
+		return;
+	}
+	Head* currHead=head;
+	Node* currNode=nullptr;
+	cout<<"===========================\n";
+	while(currHead!=nullptr){
+		cout<<currHead->num;
+		currNode=currHead->next_node;
+		while(currNode!=nullptr){
+			cout<<" -> "<<currNode->num<<"("<<currNode->weight<<")";
+			currNode=currNode->next_node;
+		}
+		currHead=currHead->next_head;
+		cout<<endl;
+	}
+	cout<<"===========================\n";
+	return;
+}
+
+// find given head
+void findHead(Head*& head, int num){
+	while(head->num!=num){
+		head=head->next_head;
+	}
+	return;
+}
+
+/*----------------------ACTION FUNCTION---------------------------*/
+
 // add vertex func
-void addVertex(int node){
-	if(!validNum(node)){
+void addVertex(Head*& head, int aa){
+	if(!validNum(aa)){
 		cout<<"add an invalid vertex\n";
 		return;
 	}
-	
+	if(vertexExist(head, aa)){
+		cout<<"vertex "<<aa<<" is already in G\n";
+		return;
+	}
+	Head* newNode=new Head();
+	newNode->num=aa;
+	if(head==nullptr){
+		head=newNode;
+		return;
+	}
+	Head* recover=head;
+	while(head->next_head!=nullptr){
+		head=head->next_head;
+	}
+	head->next_head=newNode;
+	head=recover;
+	return;
 }
 
 // del vertex func
-void deleteVertex(int node){
-	if(!validNum(node)){
+void deleteVertex(Head*& head, int aa){
+	if(!validNum(aa)){
 		cout<<"delete an invalid vertex\n";
+		return;
+	}
+	if(!vertexExist(head, aa)){
+		cout<<"vertex "<<aa<<" isn't in G\n";
 		return;
 	}
 	
 }
 
 // add edge func
-void addEdge(int from_node, int to_node, int edge){
-	
+void addEdge(Head*& head, int aa, int bb, int weight){
+	if((!vertexExist(head, aa))||(!vertexExist(head, bb))){
+		cout<<"add an invalid edge\n";
+		return;
+	}
+	Head* recover=head;
+	findHead(head, aa); // add edge head
+	Node* last=nullptr;
+	Node* curr=head->next_node;
+	while(curr!=nullptr){
+		// already connected, only update weight
+		if(curr->num==bb){
+			curr->weight=weight;
+			head=recover;
+			return;
+		}
+		last=curr;
+		curr=curr->next_node;
+	}
+	// reach nullptr, create a new connection
+	// new insert connection
+	Node* newNode=new Node();
+	newNode->num=bb;
+	newNode->weight=weight;
+	if(last==nullptr)head->next_node=newNode;
+	else last->next_node=newNode;
+	head=recover;
+	return;
 }
 
 // del edge func
-void deleteEdge(int from_node, int to_node){
+void deleteEdge(int aa, int bb){
 	
 }
 
@@ -77,50 +165,54 @@ void connectedComponents(void){
 }
 
 // Dijkstra func
-void Dijkstra(int from_node, int to_node){
+void Dijkstra(int aa, int bb){
 	
 }
 
 // BellmanFord func
-void BellmanFord(int from_node, int to_node){
+void BellmanFord(int aa, int bb){
 	
 }
 
 // combine all func together
 void graph_implementation(){
-	string action, a_node, b_node, weight;
+	Head* head=nullptr;
+	string action, aa, bb, weight;
 	while(cin>>action){
 		if(action=="addVertex"){
-			cin>>a_node;
-			addVertex(stoi(a_node));
+			cin>>aa;
+			addVertex(head, stoi(aa));
 		}
 		else if(action=="deleteVertex"){
-			cin>>a_node;
-			deleteVertex(stoi(a_node));
+			cin>>aa;
+			deleteVertex(head, stoi(aa));
 		}
 		else if(action=="addEdge"){
-			cin>>a_node;
-			cin>>b_node;
+			cin>>aa;
+			cin>>bb;
 			cin>>weight;
-			
+			addEdge(head, stoi(aa), stoi(bb), stoi(weight));
 		}
 		else if(action=="deleteEdge"){
-			cin>>a_node;
-			cin>>b_node;
+			cin>>aa;
+			cin>>bb;
 			
 		}
 		else if(action=="connectedComponents"){
 			
 		}
 		else if(action=="Dijkstra"){
-			cin>>a_node;
-			cin>>b_node;
+			cin>>aa;
+			cin>>bb;
 			
 		}
 		else if(action=="BellmanFord"){
-			cin>>a_node;
-			cin>>b_node;
+			cin>>aa;
+			cin>>bb;
 			
+		}
+		else if(action=="Print"){
+			printAdjList(head); // print out list
 		}
 		else{
 			cout<<"Error: No corresponding function"<<endl; 
@@ -130,7 +222,18 @@ void graph_implementation(){
 }
 
 int main(){
-
+	
+	/* Node* aa=new Node();
+	Node* bb=aa;
+	Node* cc=new Node();
+	cc->num=20;
+	
+	cout<<aa->next_node<<endl;
+	cout<<bb->next_node<<endl;
+	bb->next_node=cc;
+	cout<<aa->next_node->num<<endl;
+	cout<<bb->next_node->num<<endl; */
+	
 	graph_implementation();
 	
 	system("pause");

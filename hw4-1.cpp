@@ -76,11 +76,11 @@ void printAdjList(Head* head){
 }
 
 // find given head
-void findHead(Head*& head, int num){
+Head* findHead(Head* head, int num){
 	while(head->num!=num){
 		head=head->next_head;
 	}
-	return;
+	return head;
 }
 
 /*----------------------ACTION FUNCTION---------------------------*/
@@ -120,24 +120,35 @@ void deleteVertex(Head*& head, int aa){
 		cout<<"vertex "<<aa<<" isn't in G\n";
 		return;
 	}
-	
+	Head* delHead=findHead(head, aa);
+	// free delHead linked list node
+	Head* free=delHead->next_head;
+	if(free!=nullptr){
+		delHead->num=free->num;
+		delHead->next_head=free->next_head;
+		delHead->next_node=free->next_node;
+		delete free;
+		free=nullptr;
+	} 
+	else{
+		delHead=free;
+	}
+	return;
 }
 
 // add edge func
-void addEdge(Head*& head, int aa, int bb, int weight){
+void addEdge(Head* head, int aa, int bb, int weight){
 	if((!vertexExist(head, aa))||(!vertexExist(head, bb))){
 		cout<<"add an invalid edge\n";
 		return;
 	}
-	Head* recover=head;
-	findHead(head, aa); // add edge head
+	Head* hh=findHead(head, aa); // add edge head
 	Node* last=nullptr;
-	Node* curr=head->next_node;
+	Node* curr=hh->next_node;
 	while(curr!=nullptr){
 		// already connected, only update weight
 		if(curr->num==bb){
 			curr->weight=weight;
-			head=recover;
 			return;
 		}
 		last=curr;
@@ -148,14 +159,13 @@ void addEdge(Head*& head, int aa, int bb, int weight){
 	Node* newNode=new Node();
 	newNode->num=bb;
 	newNode->weight=weight;
-	if(last==nullptr)head->next_node=newNode;
+	if(last==nullptr)hh->next_node=newNode;
 	else last->next_node=newNode;
-	head=recover;
 	return;
 }
 
 // del edge func
-void deleteEdge(int aa, int bb){
+void deleteEdge(Head* head, int aa, int bb){
 	
 }
 
@@ -196,7 +206,7 @@ void graph_implementation(){
 		else if(action=="deleteEdge"){
 			cin>>aa;
 			cin>>bb;
-			
+			deleteEdge(head, stoi(aa), stoi(bb));
 		}
 		else if(action=="connectedComponents"){
 			

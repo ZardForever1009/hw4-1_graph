@@ -88,7 +88,7 @@ Head* findHead(Head* head, int id){
 }
 
 // free head & its node
-void freeHeadAndNode(Head* head){
+void freeHeadAndNode(Head*& head){
 	if(head==nullptr)return;
 	Node* currNode=head->next_node;
 	Node* delNode=nullptr;
@@ -100,6 +100,26 @@ void freeHeadAndNode(Head* head){
 	}
 	delete head;
 	head=nullptr;
+	return;
+}
+
+// free given node
+void freeGivenNode(Head* head, Node*& node){
+	if(node->last_node==nullptr){ // means node is first node after head
+		head->next_node=node->next_node;
+		if(node->next_node!=nullptr){
+			(node->next_node)->last_node=nullptr;
+		}
+	}
+	else{
+		(node->last_node)->next_node=node->next_node;
+		if(node->next_node!=nullptr){
+			(node->next_node)->last_node=node->last_node;
+		}
+	}
+	// free the memory
+	delete node;
+	node=nullptr;
 	return;
 }
 
@@ -121,12 +141,51 @@ void addVertex(Head*& head, int aa){
 		head=newNode;
 		return;
 	}
+	// insert newNode at head position
+	newNode->next_head=head;
+	head->last_head=newNode;
+	newNode->last_head=nullptr;
+	head=newNode;
+	return;
+}
+
+// del vertex func
+void deleteVertex(Head*& head, int aa){
+	if(!validNum(aa)){
+		cout<<"delete an invalid vertex\n";
+		return;
+	}
+	if(!vertexExist(head, aa)){
+		cout<<"vertex "<<aa<<" isn't in G\n";
+		return;
+	}
+	/*---------- FREE THE HEAD & FOLLOWING NODES ----------*/
+	Head* delHead=findHead(head, aa);
+	// free delHead linked list node
+	Head* next=delHead->next_head;
+	Head* prev=delHead->last_head;
+	if(prev==nullptr){ // Condition: delete the first head
+ 		head=next;
+		if(head!=nullptr)head->last_head=nullptr;
+	}
+	else{
+		prev->next_head=next;
+		if(next!=nullptr)next->last_head=prev;
+	}
+	freeHeadAndNode(delHead);
+	/*----- FREE OTHER CONNECTIONS WITH OTHER NODES -----*/
 	Head* recover=head;
-	while(head->next_head!=nullptr){
+	while(head!=nullptr){
+		Node* currNode=head->next_node;
+		while(currNode!=nullptr){
+			if(currNode->id==aa){ // encounter matched edge
+				freeGivenNode(head, currNode);
+				break; // move to next head
+			}
+			currNode=currNode->next_node;
+		}
 		head=head->next_head;
 	}
-	head->next_head=newNode;
-	newNode->last_head=head;
 	head=recover;
 	return;
 }
@@ -167,38 +226,24 @@ void addEdge(Head* head, int aa, int bb, int weight){
 
 // del edge func
 void deleteEdge(Head* head, int aa, int bb){
-	
-}
-
-// del vertex func
-void deleteVertex(Head*& head, int aa){
-	if(!validNum(aa)){
-		cout<<"delete an invalid vertex\n";
+	if((!vertexExist(head, aa))||(!vertexExist(head, bb))){
+		cout<<"delete an invalid edge\n";
 		return;
 	}
-	if(!vertexExist(head, aa)){
-		cout<<"vertex "<<aa<<" isn't in G\n";
-		return;
+	Head* hh=findHead(head, aa); // delete edge head
+	Node* currNode=hh->next_node;
+	// Ideally, we should find the delEdge & return before while loop end
+	while(currNode!=nullptr){
+		if(currNode->id==bb){ // encounter matched edge
+			freeGivenNode(hh, currNode);
+			return;
+		}
+		currNode=currNode->next_node;
 	}
-	/*---------- FREE THE HEAD & FOLLOWING NODES ----------*/
-	Head* delHead=findHead(head, aa);
-	// free delHead linked list node
-	Head* next=delHead->next_head;
-	Head* prev=delHead->last_head;
-	if(prev==nullptr){ // Condition: delete the first head
- 		head=next;
-		if(head!=nullptr)head->last_head=nullptr;
-	}
-	else{
-		prev->next_head=next;
-		if(next!=nullptr)next->last_head=prev;
-	}
-	freeHeadAndNode(delHead);
-	/*----- FREE OTHER CONNECTIONS WITH OTHER NODES -----*/
-	
+	// Not finding the edge
+	cout<<"fail to delete edge <"<<aa<<","<<bb<<">\n";
 	return;
 }
-
 
 // STRONGLY connect components func
 void connectedComponents(void){

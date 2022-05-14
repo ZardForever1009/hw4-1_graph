@@ -17,20 +17,24 @@ A  ->   a   ->  b   ->  nullptr
 B  -> nullptr
 C  ->   b   ->  nullptr
 
+p.s. Head: Doubly-Linked-List(NOT using array since NOT sure of Head counts)
+
 */
 
 /*-------------------------DEFINITION------------------------------*/
 
 // represent conected Node with Head
 struct Node{
-	int num=-1;
+	int id=-1;
 	int weight=INT_MAX;
 	Node* next_node=nullptr;
+	Node* last_node=nullptr;
 };
 
 // represent Head
 struct Head{
-	int num=-1;
+	int id=-1;
+	Head* last_head=nullptr;
 	Head* next_head=nullptr;
 	Node* next_node=nullptr;
 };
@@ -39,14 +43,14 @@ struct Head{
 /*----------------------OTHER FUNCTIONS---------------------------*/
 
 // check if input number is valid or not
-bool validNum(int num){
-	return(num>=0&&num<=100);
+bool validNum(int id){
+	return(id>=0&&id<=100);
 }
 
 // check if vertex is already in G
-bool vertexExist(Head* head, int num){
+bool vertexExist(Head* head, int id){
 	while(head!=nullptr){
-		if(head->num==num)return true;
+		if(head->id==id)return true;
 		head=head->next_head;
 	}
 	return false;
@@ -62,10 +66,10 @@ void printAdjList(Head* head){
 	Node* currNode=nullptr;
 	cout<<"===========================\n";
 	while(currHead!=nullptr){
-		cout<<currHead->num;
+		cout<<currHead->id;
 		currNode=currHead->next_node;
 		while(currNode!=nullptr){
-			cout<<" -> "<<currNode->num<<"("<<currNode->weight<<")";
+			cout<<" -> "<<currNode->id<<"("<<currNode->weight<<")";
 			currNode=currNode->next_node;
 		}
 		currHead=currHead->next_head;
@@ -76,11 +80,27 @@ void printAdjList(Head* head){
 }
 
 // find given head
-Head* findHead(Head* head, int num){
-	while(head->num!=num){
+Head* findHead(Head* head, int id){
+	while(head->id!=id){
 		head=head->next_head;
 	}
 	return head;
+}
+
+// free head & its node
+void freeHeadAndNode(Head* head){
+	if(head==nullptr)return;
+	Node* currNode=head->next_node;
+	Node* delNode=nullptr;
+	while(currNode!=nullptr){
+		delNode=currNode;
+		currNode=currNode->next_node;
+		delete delNode;
+		delNode=nullptr;
+	}
+	delete head;
+	head=nullptr;
+	return;
 }
 
 /*----------------------ACTION FUNCTION---------------------------*/
@@ -96,7 +116,7 @@ void addVertex(Head*& head, int aa){
 		return;
 	}
 	Head* newNode=new Head();
-	newNode->num=aa;
+	newNode->id=aa;
 	if(head==nullptr){
 		head=newNode;
 		return;
@@ -106,8 +126,48 @@ void addVertex(Head*& head, int aa){
 		head=head->next_head;
 	}
 	head->next_head=newNode;
+	newNode->last_head=head;
 	head=recover;
 	return;
+}
+
+// add edge func
+void addEdge(Head* head, int aa, int bb, int weight){
+	if((!vertexExist(head, aa))||(!vertexExist(head, bb))){
+		cout<<"add an invalid edge\n";
+		return;
+	}
+	Head* hh=findHead(head, aa); // added edge head
+	Node* last=nullptr;
+	Node* curr=hh->next_node;
+	while(curr!=nullptr){
+		// already connected, only update weight
+		if(curr->id==bb){
+			curr->weight=weight;
+			return;
+		}
+		last=curr;
+		curr=curr->next_node;
+	}
+	// reach nullptr, create a new connection
+	// new insert connection
+	Node* newNode=new Node();
+	newNode->id=bb;
+	newNode->weight=weight;
+	if(last==nullptr){
+		hh->next_node=newNode; // no Node after Head
+		newNode->last_node=nullptr; // means reach the Head
+	}
+	else{
+		last->next_node=newNode; // reach the last Node in currHead hh
+		newNode->last_node=last;
+	}
+	return;
+}
+
+// del edge func
+void deleteEdge(Head* head, int aa, int bb){
+	
 }
 
 // del vertex func
@@ -120,54 +180,25 @@ void deleteVertex(Head*& head, int aa){
 		cout<<"vertex "<<aa<<" isn't in G\n";
 		return;
 	}
+	/*---------- FREE THE HEAD & FOLLOWING NODES ----------*/
 	Head* delHead=findHead(head, aa);
 	// free delHead linked list node
-	Head* free=delHead->next_head;
-	if(free!=nullptr){
-		delHead->num=free->num;
-		delHead->next_head=free->next_head;
-		delHead->next_node=free->next_node;
-		delete free;
-		free=nullptr;
-	} 
+	Head* next=delHead->next_head;
+	Head* prev=delHead->last_head;
+	if(prev==nullptr){ // Condition: delete the first head
+ 		head=next;
+		if(head!=nullptr)head->last_head=nullptr;
+	}
 	else{
-		delHead=free;
+		prev->next_head=next;
+		if(next!=nullptr)next->last_head=prev;
 	}
-	return;
-}
-
-// add edge func
-void addEdge(Head* head, int aa, int bb, int weight){
-	if((!vertexExist(head, aa))||(!vertexExist(head, bb))){
-		cout<<"add an invalid edge\n";
-		return;
-	}
-	Head* hh=findHead(head, aa); // add edge head
-	Node* last=nullptr;
-	Node* curr=hh->next_node;
-	while(curr!=nullptr){
-		// already connected, only update weight
-		if(curr->num==bb){
-			curr->weight=weight;
-			return;
-		}
-		last=curr;
-		curr=curr->next_node;
-	}
-	// reach nullptr, create a new connection
-	// new insert connection
-	Node* newNode=new Node();
-	newNode->num=bb;
-	newNode->weight=weight;
-	if(last==nullptr)hh->next_node=newNode;
-	else last->next_node=newNode;
-	return;
-}
-
-// del edge func
-void deleteEdge(Head* head, int aa, int bb){
+	freeHeadAndNode(delHead);
+	/*----- FREE OTHER CONNECTIONS WITH OTHER NODES -----*/
 	
+	return;
 }
+
 
 // connect components func
 void connectedComponents(void){
@@ -232,17 +263,6 @@ void graph_implementation(){
 }
 
 int main(){
-	
-	/* Node* aa=new Node();
-	Node* bb=aa;
-	Node* cc=new Node();
-	cc->num=20;
-	
-	cout<<aa->next_node<<endl;
-	cout<<bb->next_node<<endl;
-	bb->next_node=cc;
-	cout<<aa->next_node->num<<endl;
-	cout<<bb->next_node->num<<endl; */
 	
 	graph_implementation();
 	

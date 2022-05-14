@@ -17,13 +17,13 @@ A  ->   a   ->  b   ->  nullptr
 B  -> nullptr
 C  ->   b   ->  nullptr
 
-p.s. Head: Doubly-Linked-List(NOT using array since NOT sure of Head counts)
+p.s. Head: Doubly-Linked-List(NOT using array since NOT sure of Vertices counts)
 
 */
 
 /*-------------------------DEFINITION------------------------------*/
 
-// represent conected Node with Head
+// represent connected Node with Head
 struct Node{
 	int id=-1;
 	int weight=INT_MAX;
@@ -200,7 +200,7 @@ void deleteVertex(Head*& head, int aa){
 }
 
 
-// connect components func
+// STRONGLY connect components func
 void connectedComponents(void){
 	
 }

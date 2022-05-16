@@ -39,7 +39,6 @@ struct Head{
 	Node* next_node=nullptr;
 };
 
-
 /*----------------------OTHER FUNCTIONS---------------------------*/
 
 // check if input number is valid or not
@@ -121,6 +120,33 @@ void freeGivenNode(Head* head, Node*& node){
 	delete node;
 	node=nullptr;
 	return;
+}
+
+// stack implementation (Use Doubly linked list)
+// push function(UPDATE the top)
+Node* push(Node* top, Node* push_node){
+	Node* result=new Node(); // new a node(NOT using the original node address)
+	result->id=push_node->id;
+	result->weight=push_node->weight;
+	if(top==nullptr){
+		return result;
+	}
+	else{
+		top->next_node=result;
+		top=result; // update top item
+		return top;
+	}
+}
+
+// pop function(RETURN pop item)
+Node* pop(Node* top){
+	if(top==nullptr){ // nothing to delete
+		return nullptr;
+	}
+	else{
+		top=top->last_node; // update top
+		return top->next_node; // need to release after using it
+	}
 }
 
 /*----------------------ACTION FUNCTION---------------------------*/
@@ -245,19 +271,57 @@ void deleteEdge(Head* head, int aa, int bb){
 	return;
 }
 
+// return transpose of given graph (FOR connectedComponents function)
+Head* transposeGraph(Head* head){
+	Head* result=nullptr;
+	Head* recover=head;
+	Node* currNode=nullptr;
+	// build all vertices
+	while(head!=nullptr){
+		addVertex(result, head->id);
+		head=head->next_head;
+	}
+	head=recover;
+	// add all vertex
+	while(head!=nullptr){
+		currNode=head->next_node;
+		while(currNode!=nullptr){
+			addEdge(result, currNode->id, head->id, currNode->weight);
+			currNode=currNode->next_node;
+		}
+		head=head->next_head;
+	}
+	return result;
+}
+
 // STRONGLY connect components func
-void connectedComponents(void){
+void connectedComponents(Head* head){
+	// prevent no vertex exist condition
+	if(head==nullptr){
+		
+	}
 	
+	return;
 }
 
 // Dijkstra func
-void Dijkstra(int aa, int bb){
+void Dijkstra(Head* head, int aa, int bb){
+	if((!vertexExist(head, aa))||(!vertexExist(head, bb))){
+		cout<<"an invalid vertex\n";
+		return;
+	}
 	
+	return;
 }
 
 // BellmanFord func
-void BellmanFord(int aa, int bb){
+void BellmanFord(Head* head, int aa, int bb){
+	if((!vertexExist(head, aa))||(!vertexExist(head, bb))){
+		cout<<"an invalid vertex\n";
+		return;
+	}
 	
+	return;
 }
 
 // combine all func together
@@ -285,7 +349,7 @@ void graph_implementation(){
 			deleteEdge(head, stoi(aa), stoi(bb));
 		}
 		else if(action=="connectedComponents"){
-			
+			connectedComponents(head);
 		}
 		else if(action=="Dijkstra"){
 			cin>>aa;

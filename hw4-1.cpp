@@ -122,30 +122,31 @@ void freeGivenNode(Head* head, Node*& node){
 	return;
 }
 
+/* --------------------STACK & RECORD FOR DFS---------------------------*/
 // stack implementation (Use Doubly linked list)
 // push function(UPDATE the top)
-Node* push(Node* top, Node* push_node){
-	Node* result=new Node(); // new a node(NOT using the original node address)
-	result->id=push_node->id;
-	result->weight=push_node->weight;
+Head* push(Head* top, int push_node_id){
+	Head* result=new Head(); // new a node(NOT using the original node address)
+	result->id=push_node_id;
 	if(top==nullptr){
 		return result;
 	}
 	else{
-		top->next_node=result;
+		top->next_head=result;
+		result->last_head=top;
 		top=result; // update top item
 		return top;
 	}
 }
 
 // pop function(RETURN pop item)
-Node* pop(Node* top){
+Head* pop(Head* top){
 	if(top==nullptr){ // nothing to delete
 		return nullptr;
 	}
 	else{
-		top=top->last_node; // update top
-		return top->next_node; // need to release after using it
+		top=top->last_head; // update top
+		return top->next_head; // need to release after using it
 	}
 }
 
@@ -296,10 +297,20 @@ Head* transposeGraph(Head* head){
 
 // STRONGLY connect components func
 void connectedComponents(Head* head){
-	// prevent no vertex exist condition
-	if(head==nullptr){
-		
+	int count=0;
+	Node* visited_head=buildVisitedList(head); // record visited or not
+	Head* Stack=nullptr; // stack for record
+	Head* transGraph(head);
+	Node* node=head->next_node;
+	DFS(head, visited_head, node, Stack, head);
+	if(Stack==nullptr){
+		cout<<"FUCK"<<endl;
 	}
+	while(Stack!=nullptr){
+		cout<<Stack->id<<" ";
+		Stack=Stack->last_head;
+	}
+	cout<<endl;
 	
 	return;
 }

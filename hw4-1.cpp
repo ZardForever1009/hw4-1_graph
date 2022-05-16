@@ -122,31 +122,77 @@ void freeGivenNode(Head* head, Node*& node){
 	return;
 }
 
-/* --------------------STACK & RECORD FOR DFS---------------------------*/
-// stack implementation (Use Doubly linked list)
-// push function(UPDATE the top)
-Head* push(Head* top, int push_node_id){
-	Head* result=new Head(); // new a node(NOT using the original node address)
-	result->id=push_node_id;
-	if(top==nullptr){
-		return result;
+// find how many vertices exist
+int verticesCount(Head* head){
+	int count=0;
+	while(head!=nullptr){
+		count++;
+		head=head->next_head;
 	}
-	else{
-		top->next_head=result;
-		result->last_head=top;
-		top=result; // update top item
-		return top;
+	return count;
+}
+
+// build array to store visited or not
+Node* visitedArray(Head* head, int v_count){
+	Node* result=new Node[v_count];
+	for(int i=0;i<v_count;i++){
+		result[i].id=head->id;
+		result[i].weight=0; // set 0 as not visited before
+		head=head->next_head;
+	}
+	return result;
+}
+
+// return to check if a vertex is visted or not
+bool visitedAlready(Node* visited, int id, int v_count){
+	for(int i=0;i<v_count;i++){
+		if(visited[i].id==id){
+			return visited[i].weight;
+		}
+	}
+	return false; // prevent something wrong
+}
+
+// marked a given vertices as visited
+void markVisited(Node* visited, int id, int v_count){
+	for(int i=0;i<v_count;i++){
+		if(visited[i].id==id){
+			visited[i].weight=1; // set 1 as visited already
+			return;
+		}
 	}
 }
 
-// pop function(RETURN pop item)
-Head* pop(Head* top){
-	if(top==nullptr){ // nothing to delete
-		return nullptr;
+// stack push function
+void push(int* st, int v_count, int push_id){
+	for(int i=0;i<v_count;i++){
+		if(st[i]==-1){ // means empty, then insert push_id
+			st[i]=push_id;
+			return;
+		}
+	}
+}
+
+// stack pop function
+int pop(int* st, int v_count){
+	for(int i=v_count-1;i>=0;i--){
+		if(st[i]!=-1){
+			int result=st[i];
+			st[i]=-1; // reset to empty
+			return result;
+		}
+	}
+}
+
+void DFS(Head* head, Head* currHead, Node* currNode, Node* visited, int st, int v_count){
+	if(currNode==nullptr){
+		
+	}
+	else if(visitedAlready(visited, currHead->id, v_count)){
+		
 	}
 	else{
-		top=top->last_head; // update top
-		return top->next_head; // need to release after using it
+		
 	}
 }
 
@@ -297,20 +343,15 @@ Head* transposeGraph(Head* head){
 
 // STRONGLY connect components func
 void connectedComponents(Head* head){
-	int count=0;
-	Node* visited_head=buildVisitedList(head); // record visited or not
-	Head* Stack=nullptr; // stack for record
-	Head* transGraph(head);
-	Node* node=head->next_node;
-	DFS(head, visited_head, node, Stack, head);
-	if(Stack==nullptr){
-		cout<<"FUCK"<<endl;
+	int v_count=verticesCount(head);
+	Node* visited=visitedArray(head, v_count);
+	int* st=new int[v_count]; // -1 means nothing, 0~100 means vertex id
+	for(int i=0;i<v_count;i++){
+		st[i]=-1; // initializtion
 	}
-	while(Stack!=nullptr){
-		cout<<Stack->id<<" ";
-		Stack=Stack->last_head;
-	}
-	cout<<endl;
+	
+	
+	Head* GTHead=transposeGraph(head);
 	
 	return;
 }

@@ -184,16 +184,8 @@ int pop(int* st, int v_count){
 	}
 }
 
-void DFS(Head* head, Head* currHead, Node* currNode, Node* visited, int st, int v_count){
-	if(currNode==nullptr){
-		
-	}
-	else if(visitedAlready(visited, currHead->id, v_count)){
-		
-	}
-	else{
-		
-	}
+void DFS(Head* head, Head* currHead, Node* currNode, Node* visited, int* st, int v_count){
+	
 }
 
 /*----------------------ACTION FUNCTION---------------------------*/
@@ -349,6 +341,17 @@ void connectedComponents(Head* head){
 	for(int i=0;i<v_count;i++){
 		st[i]=-1; // initializtion
 	}
+	DFS(head, head, head->next_node, visited, st, v_count);
+	
+	
+	for(int i=0;i<v_count;i++){
+		cout<<st[i]<<"| ";
+	}
+	cout<<endl;
+	for(int i=0;i<v_count;i++){
+		cout<<visited[i].weight<<"| ";
+	}
+	cout<<endl;
 	
 	
 	Head* GTHead=transposeGraph(head);

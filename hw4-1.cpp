@@ -184,8 +184,45 @@ int pop(int* st, int v_count){
 	}
 }
 
+// DFS 
 void DFS(Head* head, Head* currHead, Node* currNode, Node* visited, int* st, int v_count){
 	
+	cout<<currHead->id<<endl;
+	if(currNode!=nullptr)cout<<currNode->id<<endl;
+	else cout<<"nullptr\n";
+	for(int i=0;i<v_count;i++){
+		cout<<st[i]<<"| ";
+	}
+	cout<<endl;
+	for(int i=0;i<v_count;i++){
+		cout<<visited[i].weight<<"| ";
+	}
+	cout<<endl;
+	system("pause");
+	
+	if(visitedAlready(visited, currHead->id, v_count)){
+		push(st, v_count, currHead->id);
+		return;
+	}
+	if(currNode==nullptr){
+		push(st, v_count, currHead->id);
+		return;
+	}
+	if(currNode->next_node==nullptr){
+		markVisited(visited, currHead->id, v_count);
+	}
+	if(visitedAlready(visited, currNode->id, v_count)){
+		markVisited(visited, currNode->id, v_count);
+		push(st, v_count, currHead->id);
+		return;
+	}
+	else{
+		cout<<"DDDDD: "<<currNode->id<<endl;
+		Head* newHead=findHead(head, currNode->id);
+		DFS(head, newHead, newHead->next_node, visited, st, v_count);
+		DFS(head, currHead, currNode->next_node, visited, st, v_count);
+		return;
+	}
 }
 
 /*----------------------ACTION FUNCTION---------------------------*/
@@ -335,14 +372,19 @@ Head* transposeGraph(Head* head){
 
 // STRONGLY connect components func
 void connectedComponents(Head* head){
+	Head* origin_head=head;
 	int v_count=verticesCount(head);
 	Node* visited=visitedArray(head, v_count);
 	int* st=new int[v_count]; // -1 means nothing, 0~100 means vertex id
 	for(int i=0;i<v_count;i++){
 		st[i]=-1; // initializtion
-	}
-	DFS(head, head, head->next_node, visited, st, v_count);
+	}	
 	
+	Node* currNode=nullptr;
+	while(head!=nullptr){
+		DFS(origin_head, head, head->next_node, visited, st, v_count);
+		head=head->next_head;
+	}
 	
 	for(int i=0;i<v_count;i++){
 		cout<<st[i]<<"| ";
@@ -409,12 +451,12 @@ void graph_implementation(){
 		else if(action=="Dijkstra"){
 			cin>>aa;
 			cin>>bb;
-			
+			Dijkstra(head, stoi(aa), stoi(bb));
 		}
 		else if(action=="BellmanFord"){
 			cin>>aa;
 			cin>>bb;
-			
+			BellmanFord(head, stoi(aa), stoi(bb));
 		}
 		else if(action=="Print"){
 			printAdjList(head); // print out list

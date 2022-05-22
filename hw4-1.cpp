@@ -166,6 +166,7 @@ void markVisited(Node* visited, int id, int v_count){
 // stack push function
 void push(int* st, int v_count, int push_id){
 	for(int i=0;i<v_count;i++){
+		if(st[i]==push_id)return;
 		if(st[i]==-1){ // means empty, then insert push_id
 			st[i]=push_id;
 			return;
@@ -186,12 +187,12 @@ int pop(int* st, int v_count){
 
 // DFS 
 void DFS(Head* head, Head* currHead, Node* currNode, Node* visited, int* st, int v_count){
-	
+/* 	
 	cout<<currHead->id<<"/";
 	if(currNode!=nullptr)cout<<currNode->id;
 	else cout<<"nullptr";
-	if(visitedAlready(visited, currHead->id, v_count))cout<<"CONNECT\n";
-	else cout<<"NONO\n";
+	if(visitedAlready(visited, currHead->id, v_count))cout<<"/CONNECT\n";
+	else cout<<"/NONO\n";
 	for(int i=0;i<v_count;i++){
 		cout<<st[i]<<"| ";
 	}
@@ -200,28 +201,28 @@ void DFS(Head* head, Head* currHead, Node* currNode, Node* visited, int* st, int
 		cout<<visited[i].weight<<"| ";
 	}
 	cout<<"\n==================="<<endl;
-	
-	
-	// check if Head already visited
+	 */
 	if(visitedAlready(visited, currHead->id, v_count)){
-		push(st, v_count, currHead->id);
-		return;
+		// Head(visited) -> nullptr
+		if(currNode==nullptr){
+			push(st, v_count, currHead->id);
+			return;
+		}
+		// Head(visited) -> node
+		if(currNode->last_node==nullptr){
+			return;
+		}
 	}
-	// reach a empty node
+	markVisited(visited, currHead->id, v_count);
 	if(currNode==nullptr){
-		markVisited(visited, currHead->id, v_count);
 		push(st, v_count, currHead->id);
 		return;
 	}
-	if(currNode->next_node==nullptr){
-		markVisited(visited, currHead->id, v_count);
-	}
-	// the currNode is already visited with its head
 	if(visitedAlready(visited, currNode->id, v_count)){
+		push(st, v_count, currHead->id);
 		DFS(head, currHead, currNode->next_node, visited, st, v_count);
 		return;
 	}
-	// Not traversing yet
 	else{
 		Head* newHead=findHead(head, currNode->id);
 		DFS(head, newHead, newHead->next_node, visited, st, v_count);

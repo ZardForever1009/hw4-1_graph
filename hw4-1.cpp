@@ -166,7 +166,7 @@ void markVisited(Node* visited, int id, int v_count){
 // stack push function
 void push(int* st, int v_count, int push_id){
 	for(int i=0;i<v_count;i++){
-		if(st[i]==push_id)return;
+		if(st[i]==push_id)return; // already push before
 		if(st[i]==-1){ // means empty, then insert push_id
 			st[i]=push_id;
 			return;
@@ -185,9 +185,19 @@ int pop(int* st, int v_count){
 	}
 }
 
+// stack empty check
+bool empty(int* st, int v_count){
+	for(int i=v_count-1;i>=0;i--){
+		if(st[i]!=-1){
+			return false; // still exist some vertices
+		}
+	}
+	return true;
+}
+
 // DFS 
 void DFS(Head* head, Head* currHead, Node* currNode, Node* visited, int* st, int v_count){
-/* 	
+	/* 
 	cout<<currHead->id<<"/";
 	if(currNode!=nullptr)cout<<currNode->id;
 	else cout<<"nullptr";
@@ -378,31 +388,39 @@ Head* transposeGraph(Head* head){
 
 // STRONGLY connect components func
 void connectedComponents(Head* head){
-	Head* origin_head=head;
-	int v_count=verticesCount(head);
-	Node* visited=visitedArray(head, v_count);
+	Head* origin_head=head; 
+	int v_count=verticesCount(head); // vertex count
+	Node* visited=visitedArray(head, v_count); // record vertex visited or not
 	int* st=new int[v_count]; // -1 means nothing, 0~100 means vertex id
+	int* GTst=new int[v_count];
 	for(int i=0;i<v_count;i++){
 		st[i]=-1; // initializtion
-	}	
+		GTst[i]=-1;
+	}
+	// DFS for graph
 	while(head!=nullptr){
 		DFS(origin_head, head, head->next_node, visited, st, v_count);
 		head=head->next_head;
 	}
-	
-	
+	// reset all vertices to non-visited
+	head=origin_head;
 	for(int i=0;i<v_count;i++){
-		cout<<st[i]<<"| ";
+		visited[i].weight=0;
 	}
-	cout<<endl;
-	for(int i=0;i<v_count;i++){
-		cout<<visited[i].weight<<"| ";
+	Head* GTHead=transposeGraph(head); // transpose graph 
+	printAdjList(GTHead);
+	// DFS for transpose graph
+	int SCC_count=0; // record result
+	while(!empty(st, v_count)){
+		int pop_id=pop(st, v_count);
+		// only when non-visited, we do DFS, or we keep pop()
+		if(!visitedAlready(visited, pop_id, v_count)){
+			Head* currHead=findHead(GTHead, pop_id);
+			DFS(GTHead, currHead, currHead->next_node, visited, GTst, v_count);
+			SCC_count++;
+		}
 	}
-	cout<<endl;
-	
-	
-	Head* GTHead=transposeGraph(head);
-	
+	cout<<"connected components: "<<SCC_count<<endl;
 	return;
 }
 

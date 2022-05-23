@@ -502,12 +502,13 @@ void connectedComponents(Head* head){
 int DijkstraSolver(int v_id, Node* currNode, DijNode* arr, int v_count){
 	while(currNode!=nullptr){
 		int new_dis=getDis(v_id, arr, v_count)+currNode->weight;
-		cout<<"NEW DIS: "<<new_dis<<endl; 
+		/* cout<<"currNode: "<<currNode->id<<"/"<<"NEW DIS: "<<new_dis<<endl;  */
 		// Smaller path discover, update data
 		if(new_dis<getDis(currNode->id, arr, v_count)){
 			// new_dis becomes the path pass the vertex of v_id
 			// last_vertex becomes the vertex of v_id
 			update(currNode->id, arr, v_count, new_dis, v_id);
+			/* cout<<"UPDATE: "<<getDis(currNode->id, arr, v_count)<<endl; */
 		}
 		else; // No better path, so no update
 		currNode=currNode->next_node;
@@ -540,16 +541,16 @@ void Dijkstra(Head* head, int aa, int bb){
 	
 	// start with source vertex's neighboring vertices
 	Node* currNode=findHead(head, aa)->next_node;
+	int new_v_id=DijkstraSolver(aa, currNode, arr, v_count);
 	while(!arrAllVisited(arr, v_count)){
-		int new_v_id=DijkstraSolver(aa, currNode, arr, v_count);
-		cout<<"ID: "<<new_v_id<<endl;
-		cout<<"==========================\n";
-		for(int i=0;i<v_count;i++){
-		cout<<arr[i].id<<": "<<arr[i].dis<<endl;
-	}
-		cout<<"==========================\n";
 		currNode=findHead(head, new_v_id)->next_node;
-		DijkstraSolver(new_v_id, currNode, arr, v_count);
+		new_v_id=DijkstraSolver(new_v_id, currNode, arr, v_count);
+		/* cout<<"ID: "<<new_v_id<<endl;
+			cout<<"==========================\n";
+			for(int i=0;i<v_count;i++){
+			cout<<arr[i].id<<": "<<arr[i].dis<<endl;
+		}
+		cout<<"==========================\n"; */
 	}
 	
 	for(int i=0;i<v_count;i++){

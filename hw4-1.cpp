@@ -296,7 +296,7 @@ void setVisited(int id, DijNode* arr, int v_count){
 // find the vertex which is unvisited and smallest path
 int findMinDis(DijNode* arr, int v_count){
 	int MinDis=INT_MAX;
-	int MinDisID=0;
+	int MinDisID=-1;
 	for(int i=0;i<v_count;i++){
 		if(arr[i].visited==false){ // unvisited
 			if(arr[i].dis<MinDis){ // smaller vertex discovered
@@ -575,25 +575,24 @@ void Dijkstra(Head* head, int aa, int bb){
 	Node* currNode=findHead(head, aa)->next_node;
 	Head* origin=head;
 	int new_v_id=DijkstraSolver(aa, currNode, arr, v_count);
+	if(new_v_id==-1)goto PRINT; // no other available vertex for traverse
 	while(origin!=nullptr){
 		currNode=findHead(head, new_v_id)->next_node;
 		new_v_id=DijkstraSolver(new_v_id, currNode, arr, v_count);
+		if(new_v_id==-1)break; // no other available vertex for traverse
 		origin=origin->next_head;
-		/* cout<<"ID: "<<new_v_id<<endl;
+	/* 	cout<<"ID: "<<new_v_id<<endl;
 			cout<<"==========================\n";
 		for(int i=0;i<v_count;i++){
 			cout<<arr[i].id<<": "<<arr[i].dis<<endl;
 		}
 		cout<<"==========================\n"; */
 	}
-	// print out result and trace back the path
 	/* for(int i=0;i<v_count;i++){
 		cout<<arr[i].id<<": "<<arr[i].dis<<endl;
 	} */
-	printDijResult(arr, aa, bb, v_count);
-	
-	
-	
+	// print out result and trace back the path
+	PRINT: printDijResult(arr, aa, bb, v_count);
 	return;
 }
 

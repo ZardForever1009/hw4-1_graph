@@ -519,8 +519,35 @@ int DijkstraSolver(int v_id, Node* currNode, DijNode* arr, int v_count){
 // print out result of DijkstraSolver
 void printDijResult(DijNode* arr, int aa, int bb, int v_count){
 	// check if the path is TRUE
-	
-	
+	int total=0, idx=0;
+	for(int i=0;i<v_count;i++){
+		if(arr[i].id==bb){
+			if(arr[i].dis==INT_MAX||arr[i].dis<0){
+				cout<<"Dijkstra: no solution for "<<aa<<"->"<<bb<<endl;
+				return;
+			}
+			else{
+				total=arr[i].dis;
+				idx=i;
+			}
+		}
+	}
+	// trace back the path
+	int* path=new int[v_count];
+	int path_idx=0;
+	for(int i=0;i<v_count;i++){
+		path[i]=-1;
+	}	
+	while(arr[idx].id!=aa){
+		path[path_idx]=arr[idx].id;
+		idx=getIDIndex(arr[idx].last_vertex, arr, v_count);
+		path_idx++;
+	}
+	cout<<aa;
+	for(int i=path_idx-1;i>=0;i--){
+		cout<<"->"<<path[i];
+	}
+	cout<<" total: "<<total<<endl;
 	return;
 }
 
@@ -560,10 +587,11 @@ void Dijkstra(Head* head, int aa, int bb){
 		cout<<"==========================\n"; */
 	}
 	// print out result and trace back the path
-	printDijResult(arr, aa, bb, v_count);
 	/* for(int i=0;i<v_count;i++){
 		cout<<arr[i].id<<": "<<arr[i].dis<<endl;
 	} */
+	printDijResult(arr, aa, bb, v_count);
+	
 	
 	
 	return;

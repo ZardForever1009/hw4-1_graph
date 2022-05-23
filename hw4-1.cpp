@@ -39,6 +39,14 @@ struct Head{
 	Node* next_node=nullptr;
 };
 
+// Dijkstra record vertices stats
+struct DijNode{
+	int id=-1;
+	int dis=INT_MAX; // source to current vertex minimum cost
+	bool visited=false; // defualt mark all vertex as unvisited vertex
+	int last_vertex=-1; // allow trace back for route
+};
+
 /*----------------------OTHER FUNCTIONS---------------------------*/
 
 // check if input number is valid or not
@@ -197,21 +205,6 @@ bool empty(int* st, int v_count){
 
 // DFS 
 void DFS(Head* head, Head* currHead, Node* currNode, Node* visited, int* st, int v_count){
-	/* 
-	cout<<currHead->id<<"/";
-	if(currNode!=nullptr)cout<<currNode->id;
-	else cout<<"nullptr";
-	if(visitedAlready(visited, currHead->id, v_count))cout<<"/CONNECT\n";
-	else cout<<"/NONO\n";
-	for(int i=0;i<v_count;i++){
-		cout<<st[i]<<"| ";
-	}
-	cout<<endl;
-	for(int i=0;i<v_count;i++){
-		cout<<visited[i].weight<<"| ";
-	}
-	cout<<"\n==================="<<endl;
-	 */
 	if(visitedAlready(visited, currHead->id, v_count)){
 		// Head(visited) -> nullptr
 		if(currNode==nullptr){
@@ -239,6 +232,88 @@ void DFS(Head* head, Head* currHead, Node* currNode, Node* visited, int* st, int
 		DFS(head, currHead, currNode->next_node, visited, st, v_count);
 		return;
 	}
+}
+
+// check if a graph contains a negative edge (FOR Dijkstra's algorithm)
+bool negativeEdgeExist(Head* head){
+	while(head!=nullptr){
+		Node* currNode=head->next_node;
+		while(currNode!=nullptr){
+			if(currNode->weight<0)return true; // exist a negative edge
+			currNode=currNode->next_node;
+		}
+		head=head->next_head;
+	}
+	return false;
+}
+
+//  assign node id value to arr
+void initializeArr(Head* head, DijNode* arr){
+	int idx=0;
+	while(head!=nullptr){
+		arr[idx].id=head->id;
+		head=head->next_head;
+		idx++;
+	}
+	return;
+}
+
+// get dis of given vertex_id in arr
+int getDis(int id, DijNode* arr, int v_count){
+	for(int i=0;i<v_count;i++){
+		if(arr[i].id==id)return arr[i].dis;
+	}
+	return -1;//default value
+}
+
+// update dis & last_vertex of given id's vertex
+void update(int id, DijNode* arr, int v_count, int new_dis, int last_vertex){
+	for(int i=0;i<v_count;i++){
+		if(arr[i].id==id){
+			arr[i].dis=new_dis;
+			arr[i].last_vertex=last_vertex;
+		}
+	}
+	return;
+}
+
+// mark given vertex as visited
+void setVisited(int id, DijNode* arr, int v_count){
+	for(int i=0;i<v_count;i++){
+		if(arr[i].id==id)arr[i].visited=true;
+	}
+	return;
+}
+
+// find the vertex which is unvisited and smallest path
+int findMinDis(DijNode* arr, int v_count){
+	int MinDis=INT_MAX;
+	int MinDisID=0;
+	for(int i=0;i<v_count;i++){
+		if(arr[i].visited==false){ // unvisited
+			if(arr[i].dis<MinDis){ // smaller vertex discovered
+				MinDis=arr[i].dis;
+				MinDisID=arr[i].id;
+			}
+			else if(arr[i].dis==MinDis){ // equal vertex (COMPARE THE ID SIZE)
+				if(arr[i].id<MinDisID){
+					MinDisID=arr[i].id;
+				}
+				else;
+			}
+			else;
+		}
+		else;
+	}
+	return MinDisID;
+}
+
+// check if all vertices visited in arr
+bool arrAllVisited(DijNode* arr, int v_count){
+	for(int i=0;i<v_count;i++){
+		if(!arr[i].visited)return false;
+	}
+	return true;
 }
 
 /*----------------------ACTION FUNCTION---------------------------*/
@@ -408,7 +483,6 @@ void connectedComponents(Head* head){
 		visited[i].weight=0;
 	}
 	Head* GTHead=transposeGraph(head); // transpose graph 
-	printAdjList(GTHead);
 	// DFS for transpose graph
 	int SCC_count=0; // record result
 	while(!empty(st, v_count)){
@@ -424,12 +498,64 @@ void connectedComponents(Head* head){
 	return;
 }
 
+// Dijsktra solver
+int DijkstraSolver(int v_id, Node* currNode, DijNode* arr, int v_count){
+	while(currNode!=nullptr){
+		int new_dis=getDis(v_id, arr, v_count)+currNode->weight;
+		cout<<"NEW DIS: "<<new_dis<<endl; 
+		// Smaller path discover, update data
+		if(new_dis<getDis(currNode->id, arr, v_count)){
+			// new_dis becomes the path pass the vertex of v_id
+			// last_vertex becomes the vertex of v_id
+			update(currNode->id, arr, v_count, new_dis, v_id);
+		}
+		else; // No better path, so no update
+		currNode=currNode->next_node;
+	}
+	setVisited(v_id, arr, v_count); // update vertex to visited
+	int new_v_id=findMinDis(arr, v_count);
+	return new_v_id;
+}
+
 // Dijkstra func
 void Dijkstra(Head* head, int aa, int bb){
 	if((!vertexExist(head, aa))||(!vertexExist(head, bb))){
 		cout<<"an invalid vertex\n";
 		return;
 	}
+	if(negativeEdgeExist(head)){
+		cout<<"G contains a negative edge\n";
+		return;
+	}
+	int v_count=verticesCount(head); // vertex count
+	DijNode* arr=new DijNode[v_count];
+	initializeArr(head, arr);
+	// set the source dis as 0
+	for(int i=0;i<v_count;i++){
+		if(arr[i].id==aa){
+			arr[i].dis=0;
+			break;
+		}
+	}
+	
+	// start with source vertex's neighboring vertices
+	Node* currNode=findHead(head, aa)->next_node;
+	while(!arrAllVisited(arr, v_count)){
+		int new_v_id=DijkstraSolver(aa, currNode, arr, v_count);
+		cout<<"ID: "<<new_v_id<<endl;
+		cout<<"==========================\n";
+		for(int i=0;i<v_count;i++){
+		cout<<arr[i].id<<": "<<arr[i].dis<<endl;
+	}
+		cout<<"==========================\n";
+		currNode=findHead(head, new_v_id)->next_node;
+		DijkstraSolver(new_v_id, currNode, arr, v_count);
+	}
+	
+	for(int i=0;i<v_count;i++){
+		cout<<arr[i].id<<": "<<arr[i].dis<<endl;
+	}
+	
 	
 	return;
 }

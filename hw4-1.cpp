@@ -266,6 +266,14 @@ int getDis(int id, DijNode* arr, int v_count){
 	return -1;//default value
 }
 
+// get dis of given vertex_id in arr
+int getIDIndex(int id, DijNode* arr, int v_count){
+	for(int i=0;i<v_count;i++){
+		if(arr[i].id==id)return i;
+	}
+	return -1;//default value
+}
+
 // update dis & last_vertex of given id's vertex
 void update(int id, DijNode* arr, int v_count, int new_dis, int last_vertex){
 	for(int i=0;i<v_count;i++){
@@ -502,13 +510,11 @@ void connectedComponents(Head* head){
 int DijkstraSolver(int v_id, Node* currNode, DijNode* arr, int v_count){
 	while(currNode!=nullptr){
 		int new_dis=getDis(v_id, arr, v_count)+currNode->weight;
-		/* cout<<"currNode: "<<currNode->id<<"/"<<"NEW DIS: "<<new_dis<<endl;  */
 		// Smaller path discover, update data
 		if(new_dis<getDis(currNode->id, arr, v_count)){
 			// new_dis becomes the path pass the vertex of v_id
 			// last_vertex becomes the vertex of v_id
 			update(currNode->id, arr, v_count, new_dis, v_id);
-			/* cout<<"UPDATE: "<<getDis(currNode->id, arr, v_count)<<endl; */
 		}
 		else; // No better path, so no update
 		currNode=currNode->next_node;
@@ -516,6 +522,14 @@ int DijkstraSolver(int v_id, Node* currNode, DijNode* arr, int v_count){
 	setVisited(v_id, arr, v_count); // update vertex to visited
 	int new_v_id=findMinDis(arr, v_count);
 	return new_v_id;
+}
+
+// print out result of DijkstraSolver
+void printDijResult(DijNode* arr, int aa, int bb, int v_count){
+	// check if the path is TRUE
+	
+	
+	return;
 }
 
 // Dijkstra func
@@ -538,21 +552,22 @@ void Dijkstra(Head* head, int aa, int bb){
 			break;
 		}
 	}
-	
 	// start with source vertex's neighboring vertices
 	Node* currNode=findHead(head, aa)->next_node;
 	int new_v_id=DijkstraSolver(aa, currNode, arr, v_count);
 	while(!arrAllVisited(arr, v_count)){
 		currNode=findHead(head, new_v_id)->next_node;
 		new_v_id=DijkstraSolver(new_v_id, currNode, arr, v_count);
-		/* cout<<"ID: "<<new_v_id<<endl;
+		cout<<new_v_id<<endl;
+		cout<<"ID: "<<new_v_id<<endl;
 			cout<<"==========================\n";
-			for(int i=0;i<v_count;i++){
+		for(int i=0;i<v_count;i++){
 			cout<<arr[i].id<<": "<<arr[i].dis<<endl;
 		}
-		cout<<"==========================\n"; */
+		cout<<"==========================\n";
 	}
-	
+	// print out result and trace back the path
+	printDijResult(arr, aa, bb, v_count);
 	for(int i=0;i<v_count;i++){
 		cout<<arr[i].id<<": "<<arr[i].dis<<endl;
 	}

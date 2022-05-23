@@ -316,14 +316,6 @@ int findMinDis(DijNode* arr, int v_count){
 	return MinDisID;
 }
 
-// check if all vertices visited in arr
-bool arrAllVisited(DijNode* arr, int v_count){
-	for(int i=0;i<v_count;i++){
-		if(!arr[i].visited)return false;
-	}
-	return true;
-}
-
 /*----------------------ACTION FUNCTION---------------------------*/
 
 // add vertex func
@@ -554,23 +546,24 @@ void Dijkstra(Head* head, int aa, int bb){
 	}
 	// start with source vertex's neighboring vertices
 	Node* currNode=findHead(head, aa)->next_node;
+	Head* origin=head;
 	int new_v_id=DijkstraSolver(aa, currNode, arr, v_count);
-	while(!arrAllVisited(arr, v_count)){
+	while(origin!=nullptr){
 		currNode=findHead(head, new_v_id)->next_node;
 		new_v_id=DijkstraSolver(new_v_id, currNode, arr, v_count);
-		cout<<new_v_id<<endl;
-		cout<<"ID: "<<new_v_id<<endl;
+		origin=origin->next_head;
+		/* cout<<"ID: "<<new_v_id<<endl;
 			cout<<"==========================\n";
 		for(int i=0;i<v_count;i++){
 			cout<<arr[i].id<<": "<<arr[i].dis<<endl;
 		}
-		cout<<"==========================\n";
+		cout<<"==========================\n"; */
 	}
 	// print out result and trace back the path
 	printDijResult(arr, aa, bb, v_count);
-	for(int i=0;i<v_count;i++){
+	/* for(int i=0;i<v_count;i++){
 		cout<<arr[i].id<<": "<<arr[i].dis<<endl;
-	}
+	} */
 	
 	
 	return;

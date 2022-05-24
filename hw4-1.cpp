@@ -39,8 +39,8 @@ struct Head{
 	Node* next_node=nullptr;
 };
 
-// Dijkstra record vertices stats
-struct DijNode{
+// nodes that record shortest path vertices stats
+struct SPNode{
 	int id=-1;
 	int dis=INT_MAX; // source to current vertex minimum cost
 	bool visited=false; // defualt mark all vertex as unvisited vertex
@@ -248,7 +248,7 @@ bool negativeEdgeExist(Head* head){
 }
 
 //  assign node id value to arr
-void initializeArr(Head* head, DijNode* arr){
+void initializeArr(Head* head, SPNode* arr){
 	int idx=0;
 	while(head!=nullptr){
 		arr[idx].id=head->id;
@@ -259,7 +259,7 @@ void initializeArr(Head* head, DijNode* arr){
 }
 
 // get dis of given vertex_id in arr
-int getDis(int id, DijNode* arr, int v_count){
+int getDis(int id, SPNode* arr, int v_count){
 	for(int i=0;i<v_count;i++){
 		if(arr[i].id==id)return arr[i].dis;
 	}
@@ -267,7 +267,7 @@ int getDis(int id, DijNode* arr, int v_count){
 }
 
 // get dis of given vertex_id in arr
-int getIDIndex(int id, DijNode* arr, int v_count){
+int getIDIndex(int id, SPNode* arr, int v_count){
 	for(int i=0;i<v_count;i++){
 		if(arr[i].id==id)return i;
 	}
@@ -275,7 +275,7 @@ int getIDIndex(int id, DijNode* arr, int v_count){
 }
 
 // update dis & last_vertex of given id's vertex
-void update(int id, DijNode* arr, int v_count, int new_dis, int last_vertex){
+void update(int id, SPNode* arr, int v_count, int new_dis, int last_vertex){
 	for(int i=0;i<v_count;i++){
 		if(arr[i].id==id){
 			arr[i].dis=new_dis;
@@ -286,7 +286,7 @@ void update(int id, DijNode* arr, int v_count, int new_dis, int last_vertex){
 }
 
 // mark given vertex as visited
-void setVisited(int id, DijNode* arr, int v_count){
+void setVisited(int id, SPNode* arr, int v_count){
 	for(int i=0;i<v_count;i++){
 		if(arr[i].id==id)arr[i].visited=true;
 	}
@@ -294,7 +294,7 @@ void setVisited(int id, DijNode* arr, int v_count){
 }
 
 // find the vertex which is unvisited and smallest path
-int findMinDis(DijNode* arr, int v_count){
+int findMinDis(SPNode* arr, int v_count){
 	int MinDis=INT_MAX;
 	int MinDisID=-1;
 	for(int i=0;i<v_count;i++){
@@ -499,7 +499,7 @@ void connectedComponents(Head* head){
 }
 
 // Dijsktra solver
-int DijkstraSolver(int v_id, Node* currNode, DijNode* arr, int v_count){
+int DijkstraSolver(int v_id, Node* currNode, SPNode* arr, int v_count){
 	while(currNode!=nullptr){
 		int new_dis=getDis(v_id, arr, v_count)+currNode->weight;
 		// Smaller path discover, update data
@@ -516,14 +516,14 @@ int DijkstraSolver(int v_id, Node* currNode, DijNode* arr, int v_count){
 	return new_v_id;
 }
 
-// print out result of DijkstraSolver
-void printDijResult(DijNode* arr, int aa, int bb, int v_count){
+// print out result of ShortestPath
+void printShortestPath(SPNode* arr, int aa, int bb, int v_count, string algo){
 	// check if the path is TRUE
 	int total=0, idx=0;
 	for(int i=0;i<v_count;i++){
 		if(arr[i].id==bb){
 			if(arr[i].dis==INT_MAX||arr[i].dis<0){
-				cout<<"Dijkstra: no solution for "<<aa<<"->"<<bb<<endl;
+				cout<<algo<<": no solution for "<<aa<<"->"<<bb<<endl;
 				return;
 			}
 			else{
@@ -562,7 +562,7 @@ void Dijkstra(Head* head, int aa, int bb){
 		return;
 	}
 	int v_count=verticesCount(head); // vertex count
-	DijNode* arr=new DijNode[v_count];
+	SPNode* arr=new SPNode[v_count];
 	initializeArr(head, arr);
 	// set the source dis as 0
 	for(int i=0;i<v_count;i++){
@@ -581,19 +581,44 @@ void Dijkstra(Head* head, int aa, int bb){
 		new_v_id=DijkstraSolver(new_v_id, currNode, arr, v_count);
 		if(new_v_id==-1)break; // no other available vertex for traverse
 		origin=origin->next_head;
-	/* 	cout<<"ID: "<<new_v_id<<endl;
-			cout<<"==========================\n";
-		for(int i=0;i<v_count;i++){
-			cout<<arr[i].id<<": "<<arr[i].dis<<endl;
-		}
-		cout<<"==========================\n"; */
 	}
-	/* for(int i=0;i<v_count;i++){
-		cout<<arr[i].id<<": "<<arr[i].dis<<endl;
-	} */
 	// print out result and trace back the path
-	PRINT: printDijResult(arr, aa, bb, v_count);
+	PRINT: printShortestPath(arr, aa, bb, v_count, "Dijkstra");
 	return;
+}
+
+// BellmanFord solver
+// return a SPNode array that we can compare to check if negative cycle exist
+SPNode* BellmanFordSolver(Head* head, int iter_times, int v_count, int aa){
+	SPNode* arr=new SPNode[v_count]; // arr need to be returned
+	initializeArr(head, arr);
+	// set the source dis as 0
+	for(int i=0;i<v_count;i++){
+		if(arr[i].id==aa){
+			arr[i].dis=0;
+			break;
+		}
+	}
+	
+	return arr;
+}
+
+// check if negative cycle exist
+// do one more time relax 
+bool negativeCycleExist(Head* head, SPNode* arr, int v_count){
+	Node* currNode=nullptr;
+	while(head!=nullptr){
+		currNode=head->next_node;
+		while(currNode!=nullptr){
+			int new_dis=getDis(head->id, arr, v_count)+currNode->weight;
+			if(new_dis<getDis(currNode->id, arr, v_count)){
+				return true;
+			}
+			currNode=currNode->next_node;
+		}
+		head=head->next_head;
+	}
+	return false;
 }
 
 // BellmanFord func
@@ -602,7 +627,15 @@ void BellmanFord(Head* head, int aa, int bb){
 		cout<<"an invalid vertex\n";
 		return;
 	}
-	
+	int v_count=verticesCount(head); // vertex count
+	SPNode* arr=BellmanFordSolver(head, v_count-1, v_count, aa);
+	bool negCycleExist=negativeCycleExist(head, arr, v_count);
+	if(negCycleExist){
+		cout<<"G contains a cycle of negative length\n";
+	}
+	else{
+		printShortestPath(arr, aa, bb, v_count, "BellmanFord");
+	}
 	return;
 }
 

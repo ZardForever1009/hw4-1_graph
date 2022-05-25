@@ -522,14 +522,27 @@ void printShortestPath(SPNode* arr, int aa, int bb, int v_count, string algo){
 	int total=0, idx=0;
 	for(int i=0;i<v_count;i++){
 		if(arr[i].id==bb){
-			if(arr[i].dis==INT_MAX||arr[i].dis<0){
-				cout<<algo<<": no solution for "<<aa<<"->"<<bb<<endl;
-				return;
+			if(algo=="Dijkstra"){
+				if(arr[i].dis==INT_MAX||arr[i].dis<0){ // no possible negative path
+					cout<<algo<<": no solution for "<<aa<<"->"<<bb<<endl;
+					return;
+				}
+				else{
+					total=arr[i].dis;
+					idx=i;
+				}
 			}
-			else{
-				total=arr[i].dis;
-				idx=i;
+			else if(algo=="BellmanFord"){
+				if(arr[i].dis==INT_MAX){
+					cout<<algo<<": no solution for "<<aa<<"->"<<bb<<endl;
+					return;
+				}
+				else{
+					total=arr[i].dis;
+					idx=i;
+				}
 			}
+			else cout<<algo<<": No matched algorithm\n";
 		}
 	}
 	// trace back the path
@@ -622,7 +635,7 @@ SPNode* BellmanFordSolver(Head* head, int iter_times, int v_count, int aa){
 				else; // No better path, so no update
 				
 				/*---------------------------------------------------------------------------*/
-				/* cout<<"head: "<<head->id<<"/"<<"node: "<<currNode->id<<endl;
+			/* 	cout<<"head: "<<head->id<<"/"<<"node: "<<currNode->id<<endl;
 				cout<<"==========================\n";
 				for(int i=0;i<v_count;i++){
 					cout<<arr[i].id<<": "<<arr[i].dis<<endl;

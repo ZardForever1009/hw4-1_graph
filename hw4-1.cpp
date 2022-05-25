@@ -599,7 +599,44 @@ SPNode* BellmanFordSolver(Head* head, int iter_times, int v_count, int aa){
 			break;
 		}
 	}
-	
+	Head* recover=head;
+	Node* currNode=nullptr;
+	for(int i=0;i<iter_times;i++){ // iterate for iter_times times
+		// each iteration, run all edges
+		while(head!=nullptr){
+			currNode=head->next_node;
+			while(currNode!=nullptr){
+				int new_dis=getDis(head->id, arr, v_count)+currNode->weight;
+				/*---------------------------------------------------------------------------*/
+			/* 	cout<<"!!!!!!!!!!:"<<getDis(head->id, arr, v_count)<<endl;
+				cout<<"##########:"<<currNode->weight<<endl;
+				cout<<"@@@@@@@@@@:"<<new_dis<<endl; */
+				/*---------------------------------------------------------------------------*/
+				if(getDis(head->id, arr, v_count)==INT_MAX); // means head not reachable yet
+				// Smaller path discover, update data
+				else if(new_dis<getDis(currNode->id, arr, v_count)){
+					// new_dis becomes the path pass the vertex of v_id
+					// last_vertex becomes the vertex of v_id
+					update(currNode->id, arr, v_count, new_dis, head->id);
+				}
+				else; // No better path, so no update
+				
+				/*---------------------------------------------------------------------------*/
+				/* cout<<"head: "<<head->id<<"/"<<"node: "<<currNode->id<<endl;
+				cout<<"==========================\n";
+				for(int i=0;i<v_count;i++){
+					cout<<arr[i].id<<": "<<arr[i].dis<<endl;
+				}
+				cout<<endl; */
+				/*---------------------------------------------------------------------------*/
+				
+				currNode=currNode->next_node;
+			}
+			head=head->next_head;
+		}
+		head=recover; // go back to origin_head
+		/* cout<<"---------------------------------------------------"<<endl; */
+	}
 	return arr;
 }
 
@@ -611,7 +648,8 @@ bool negativeCycleExist(Head* head, SPNode* arr, int v_count){
 		currNode=head->next_node;
 		while(currNode!=nullptr){
 			int new_dis=getDis(head->id, arr, v_count)+currNode->weight;
-			if(new_dis<getDis(currNode->id, arr, v_count)){
+			if(getDis(head->id, arr, v_count)==INT_MAX);
+			else if(new_dis<getDis(currNode->id, arr, v_count)){
 				return true;
 			}
 			currNode=currNode->next_node;
@@ -636,6 +674,8 @@ void BellmanFord(Head* head, int aa, int bb){
 	else{
 		printShortestPath(arr, aa, bb, v_count, "BellmanFord");
 	}
+	delete[] arr;
+	arr=nullptr;
 	return;
 }
 
